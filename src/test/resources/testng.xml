@@ -1,0 +1,14 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!-- Full API regression. Tests are independent (each creates its own data), so they run in parallel. -->
+<suite name="Restful-Booker API Regression" parallel="methods" thread-count="4" data-provider-thread-count="3">
+    <test name="API Regression">
+        <groups>
+            <run>
+                <include name="regression"/>
+            </run>
+        </groups>
+        <packages>
+            <package name="com.qa.api.tests"/>
+        </packages>
+    </test>
+</suite>

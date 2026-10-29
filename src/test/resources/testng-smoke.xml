@@ -1,0 +1,14 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!-- Post-deployment sanity: health, auth, create, read. -->
+<suite name="Restful-Booker API Smoke">
+    <test name="API Smoke">
+        <groups>
+            <run>
+                <include name="smoke"/>
+            </run>
+        </groups>
+        <packages>
+            <package name="com.qa.api.tests"/>
+        </packages>
+    </test>
+</suite>
