@@ -1,0 +1,17 @@
+# Build output and reports
+target/
+allure-results/
+allure-report/
+test-output/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
