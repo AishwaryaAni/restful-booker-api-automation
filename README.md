@@ -150,6 +150,7 @@ Real behaviour discovered while automating, documented in the tests:
 | Bad credentials on `POST /auth` | 401 Unauthorized | **200** + `{"reason":"Bad credentials"}` | Asserts no token is issued |
 | Incomplete payload on `POST /booking` | 400 Bad Request | **500** Internal Server Error | Asserts rejection (≥ 400); flagged as known defect |
 | Successful `DELETE` | 200 / 204 | **201** Created | Pinned to actual behaviour |
+| `Accept` header listing several JSON types (REST Assured's `ContentType.JSON` default) | 200 (content negotiation) | **418** I'm a teapot | Spec sends exactly `Accept: application/json` |
 
 ---
 
