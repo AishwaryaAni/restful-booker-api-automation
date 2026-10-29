@@ -37,7 +37,8 @@ public final class SpecFactory {
         return new RequestSpecBuilder()
                 .setBaseUri(ConfigReader.get("baseUrl"))
                 .setContentType(ContentType.JSON)
-                .setAccept(ContentType.JSON)
+                // Exactly "application/json": ContentType.JSON sends 4 MIME types, which this API answers with 418
+                .setAccept("application/json")
                 .setConfig(config)
                 .addFilter(new AllureRestAssured()) // attaches every request/response to the report
                 .build();
