@@ -1,0 +1,89 @@
+name: API Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: "30 3 * * *"   # nightly regression, 09:00 IST
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: "TestNG suite file"
+        required: false
+        default: "testng.xml"
+        type: choice
+        options: [ testng.xml, testng-smoke.xml ]
+
+concurrency:
+  group: api-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Run API tests
+        id: tests
+        continue-on-error: true
+        run: mvn -B clean test -Dsuite=${{ github.event.inputs.suite || 'testng.xml' }}
+
+      - name: Set up Node (for Allure CLI)
+        if: always()
+        uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+
+      - name: Generate Allure report
+        if: always()
+        run: npx --yes allure-commandline generate target/allure-results --clean -o allure-report
+
+      - name: Upload Allure report (build artifact)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report
+          path: allure-report
+          retention-days: 14
+
+      - name: Upload report for GitHub Pages
+        if: always() && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: allure-report
+
+      - name: Fail the job if tests failed
+        if: steps.tests.outcome == 'failure'
+        run: |
+          echo "::error::One or more API tests failed — see the Allure report."
+          exit 1
+
+  publish-report:
+    needs: test
+    if: always() && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && needs.test.result != 'cancelled'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Deploy Allure report to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
